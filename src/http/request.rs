@@ -5,19 +5,21 @@ use std::fmt::{Formatter, Result as FmtResult, Display, Debug};
 use std::str;
 use std::str::Utf8Error;
 
-pub struct Request {
-     path: &str,
-     query_string: Option<&str>,
+pub struct Request<'buf> {
+     path: &'buf str,
+     query_string: Option<&'buf str>,
      method: Method
  }
 
- impl TryFrom<&[u8]> for Request {
+ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
      type Error = ParseError;
 
      // GET /search?name=abc&sort=1 HTTP/1.1
-     fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {
+     fn try_from(buf: &'buf [u8]) -> Result<Self, Self::Error> {
 
+        // first solution
         //let request = str::from_utf8(buf).or(Err(ParseError::InvalidEncoding))?; // "?" means return error or wrapped value
+        // better solution
         let request = str::from_utf8(buf)?; // "?" means return error or wrapped value and try to convert utf8 error to ParseError, we do this with help of  impl From<Utf8Error> for ParseError
         
         let (method, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?; // request var is set to this request in tuple
@@ -31,6 +33,7 @@ pub struct Request {
         let method: Method = method.parse()?; // If we impl fromStr trait we get parse()
         let mut query_string = None;
         
+        // first solution
         // let question_mark_index = path.find('?');
         // if question_mark_index.is_some() {
         //     let index = question_mark_index.unwrap();
@@ -38,6 +41,7 @@ pub struct Request {
         //     path = &path[..index];
         // }
 
+        // better solution
         if let Some(question_mark_index) = path.find('?') {
             query_string = Some(&path[question_mark_index+1..]); // '?' is 1 byte
             path = &path[..question_mark_index];
