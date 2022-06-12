@@ -4,10 +4,12 @@ use std::error::Error;
 use std::fmt::{Formatter, Result as FmtResult, Display, Debug};
 use std::str;
 use std::str::Utf8Error;
+use super::QueryString;
 
+#[derive(Debug)]
 pub struct Request<'buf> {
      path: &'buf str,
-     query_string: Option<&'buf str>,
+     query_string: Option<QueryString<'buf>>,
      method: Method
  }
 
@@ -43,7 +45,7 @@ pub struct Request<'buf> {
 
         // better solution
         if let Some(question_mark_index) = path.find('?') {
-            query_string = Some(&path[question_mark_index+1..]); // '?' is 1 byte
+            query_string = Some( QueryString::from(&path[question_mark_index+1..])); // '?' is 1 byte
             path = &path[..question_mark_index];
         }
 
