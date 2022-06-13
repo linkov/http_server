@@ -48,9 +48,12 @@ impl Response {
     //     )
     // }
 
-    // To deal with overhead Rust provides "static displatch", the lookup is done at compile time
-    // concrete type inserted in each fn call based on param type
-    // Downside is slower compile time + larger binary which can be a problem on embedded systems
+    /**
+     * To deal with overhead Rust provides "static displatch", the lookup is done at compile time
+     * concrete type inserted in each fn call based on param type
+     * Downside is slower compile time + larger binary which can be a problem on embedded systems
+     *  */ 
+
     pub fn send(&self, stream: &mut impl Write) -> IOResult<()> {
         let b = match &self.body {
             Some(b) => b,
