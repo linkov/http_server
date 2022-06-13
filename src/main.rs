@@ -12,6 +12,12 @@ mod http;
 mod server;
 mod website_handler;
 
+/**
+ * Next steps:
+ * - Handle HTTP headers in Request and Response
+ * - Handle multiple requests at a time (check std::thread & std::sync modules)
+ * - Try async await with Tokio
+ */
 
 /**
  * env macro reads env variables provided by cargo at compile time.
