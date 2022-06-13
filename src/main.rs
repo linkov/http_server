@@ -4,17 +4,15 @@
 use server::Server;
 use http::Request;
 use http::Method;
+use website_handler::WebsiteHandler;
 
 mod http;
 mod server;
-
+mod website_handler;
 
 fn main() {
-    // let get = Method::GET;
-    // let delete = Method::DELETE;
-    // let post = Method::POST;
-    // let put = Method::PUT;
     let server = Server::new("127.0.0.1:8080".to_string());
-    server.run();
+    // we dont have to pass any params to Handler b/c its an empty struct
+    server.run(WebsiteHandler);
 }
 

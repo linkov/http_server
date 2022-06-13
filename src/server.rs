@@ -1,9 +1,22 @@
 use::std::net::TcpListener;
 use::std::io::{Read,Write};
+use request::ParseError;
+
 use crate::http::{Request, Response, StatusCode};
 use crate::http::request;
 use std::convert::TryFrom;
 use std::convert::TryInto;
+
+// A trait is like an interface or a protocol in Swift
+pub trait Handler {
+    fn handle_request(&mut self, request: &Request) -> Response;
+
+    // We can provide default impls, for example for very generic cases
+    fn handle_bad_request(&mut self, e: &ParseError) -> Response {
+        println!("Failed to parse request: {}", e);
+        Response::new(StatusCode::BadRequest, None)
+    }
+}
 
 pub struct Server {
     addr: String
@@ -13,7 +26,7 @@ impl Server {
     pub fn new(addr: String) -> Self {
         Self { addr }
     }
-    pub fn run(self) {
+    pub fn run(self, mut hadler: impl Handler) {
         let listener = TcpListener::bind(&self.addr).unwrap();
         println!("Listening on: {}", &self.addr);
         loop {
@@ -27,14 +40,11 @@ impl Server {
 
                             let response = match Request::try_from(&buf[..]) {
                                  Ok(request) => {
-                                     dbg!(request);
-                                     Response::new(
-                                         StatusCode::Ok,
-                                         Some("<h1>Hello</h1>".to_string())
-                                        )
+                                     hadler.handle_request(&request)
                                  }
                                  Err(e) => {
-                                     Response::new(StatusCode::BadRequest, None)
+                                     hadler.handle_bad_request(&e)
+                                     
                                  }
                              };
 
